@@ -509,4 +509,4 @@ if(typeof loadBuilderState!=="undefined") loadBuilderState();
 // ══════════════════════════════════════════
 buildStats();
 loadAll();
-setInterval(()=>{ collect(); try{ localStorage.setItem('dnd5e_v3',JSON.stringify(S)); }catch(e){} }, 90000);
+setInterval(()=>{ saveAll(); }, 5000);
