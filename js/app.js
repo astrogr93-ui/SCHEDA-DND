@@ -415,98 +415,109 @@ btn.classList.add('active');
 document.querySelector('.scroll-area').scrollTop=0;
 }
 // ══════════════════════════════════════════
-// SAVE / LOAD
+// SAVE / LOAD (Versione Ultra-Persistente)
 // ══════════════════════════════════════════
 const FIELDS = ['charName','hdrClass','hdrBg','hdrPlayer','hdrRace','hdrAlign','hdrXP',
 'vision','movSpeed','movHour','movDay','movSpecial',
 'hpCur','hpMax','hpTemp','hdTotal','combAC','combArmor','armorNotes',
 'spellClass','spellAttr','spellPrepared','sorcUsed','sorcMax',
-'coinMP','coinMO','coinME','coinMA','coinMR',
+'coinMP','coinMO','coinME','coinMR',
 'gemsNotes','depositsNotes','zainoMax','tascaN','tascaMax','mountName','mountSpeed','mountNotes',
 'dpCreated','dpBorn','dpGod','dpAge','dpSex','dpSize','dpHeight','dpWeight',
 'dpHair','dpEyes','dpSkin','dpAppearance','bgTraits','bgIdeals','bgBonds','bgFlaws',
 'bgAllies','bgEnemies','bgNotes','toolComp','languages','classPriv','racialTraits','talentsText'
 ];
-const STAT_IDS = STATS.map(s=>s.id);
+
 function collect(){
-FIELDS.forEach(id=>{ const el=document.getElementById(id); if(el) S[id.startsWith('coin')?(id.replace('coin','')):id]=el.type==='checkbox'?el.checked:el.value; });
-['coinMP','coinMO','coinME','coinMA','coinMR'].forEach(k=>{ const el=document.getElementById(k); if(el) S.coins[k.replace('coin','')]=parseInt(el.value)||0; });
-STAT_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) S[id]=parseInt(el.value)||10; });
-S.profBonus=parseInt(document.getElementById('profBonus')?.value)||2;
-S.inspiration=document.getElementById('inspiration')?.checked||false;
-S.hpCur=parseInt(document.getElementById('hpCur')?.value)||0;
-S.hpMax=parseInt(document.getElementById('hpMax')?.value)||0;
-S.hpTemp=parseInt(document.getElementById('hpTemp')?.value)||0;
-S.combAC=parseInt(document.getElementById('combAC')?.value)||10;
+    FIELDS.forEach(id=>{ 
+        const el=document.getElementById(id); 
+        if(el) S[id.startsWith('coin')?(id.replace('coin','')):id]=el.type==='checkbox'?el.checked:el.value; 
+    });
+    ['MP','MO','ME','MA','MR'].forEach(k=>{ 
+        const el=document.getElementById('coin'+k); 
+        if(el) S.coins[k]=parseInt(el.value)||0; 
+    });
+    STATS.map(s=>s.id).forEach(id=>{ 
+        const el=document.getElementById(id); 
+        if(el) S[id]=parseInt(el.value)||10; 
+    });
+    S.profBonus=parseInt(document.getElementById('profBonus')?.value)||2;
+    S.inspiration=document.getElementById('inspiration')?.checked||false;
+    S.hpCur=parseInt(document.getElementById('hpCur')?.value)||0;
+    S.hpMax=parseInt(document.getElementById('hpMax')?.value)||0;
+    S.hpTemp=parseInt(document.getElementById('hpTemp')?.value)||0;
+    S.combAC=parseInt(document.getElementById('combAC')?.value)||10;
 }
+
 function saveAll(){
-collect();
-collectBuilderState();
-try{
-localStorage.setItem('dnd5e_v3', JSON.stringify(S));
-const f=document.getElementById('saveFab');
-f.textContent='✓'; f.classList.add('ok');
-setTimeout(()=>{ f.textContent='💾'; f.classList.remove('ok'); },1800);
-}catch(e){ alert('Errore: '+e.message); }
+    collect();
+    try {
+        localStorage.setItem('dnd5e_v3', JSON.stringify(S));
+        console.log("Dati salvati con successo");
+        const f=document.getElementById('saveFab');
+        if(f) {
+            f.textContent='✓'; f.classList.add('ok');
+            setTimeout(()=>{ f.textContent='💾'; f.classList.remove('ok'); },1000);
+        }
+    } catch(e) { 
+        console.error('Errore localStorage:', e); 
+    }
 }
+
 function loadAll(){
-try{ const raw=localStorage.getItem('dnd5e_v3'); if(raw) Object.assign(S,JSON.parse(raw)); }
-catch(e){ console.warn(e); }
-// Popola header
-['charName','hdrClass','hdrBg','hdrPlayer','hdrRace','hdrAlign','hdrXP'].forEach(id=>{
-const el=document.getElementById(id); if(el) el.value=S[id]||'';
-});
-STAT_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=S[id]||10; });
-document.getElementById('profBonus').value=S.profBonus||2;
-document.getElementById('inspiration').checked=S.inspiration||false;
-document.getElementById('vision').value=S.vision||'';
-document.getElementById('movSpeed').value=S.movSpeed||9;
-document.getElementById('movHour').value=S.movHour||4;
-document.getElementById('movDay').value=S.movDay||35;
-document.getElementById('movSpecial').value=S.movSpecial||'';
-document.getElementById('hpCur').value=S.hpCur||0;
-document.getElementById('hpMax').value=S.hpMax||0;
-document.getElementById('hpMaxShow').textContent=S.hpMax||0;
-document.getElementById('hpTemp').value=S.hpTemp||0;
-document.getElementById('hdTotal').value=S.hitDice||'';
-document.getElementById('combAC').value=S.combAC||10;
-document.getElementById('combArmor').value=S.combArmor||'';
-document.getElementById('armorNotes').value=S.armorNotes||'';
-document.getElementById('spellClass').value=S.spellClass||'';
-document.getElementById('spellAttr').value=S.spellAttr||'INT';
-document.getElementById('spellPrepared').value=S.spellPrepared||0;
-document.getElementById('sorcUsed').value=S.sorcUsed||0;
-document.getElementById('sorcMax').value=S.sorcMax||0;
-['MP','MO','ME','MA','MR'].forEach(k=>{ const el=document.getElementById('coin'+k); if(el) el.value=S.coins[k]||0; });
-document.getElementById('gemsNotes').value=S.gemsNotes||'';
-document.getElementById('depositsNotes').value=S.depositsNotes||'';
-document.getElementById('zainoMax').value=S.zainoMax||20;
-document.getElementById('tascaN').value=S.tascaN||1;
-document.getElementById('tascaMax').value=S.tascaMax||2;
-document.getElementById('mountName').value=S.mountName||'';
-document.getElementById('mountSpeed').value=S.mountSpeed||0;
-document.getElementById('mountNotes').value=S.mountNotes||'';
-['dpCreated','dpBorn','dpGod','dpAge','dpSex','dpSize','dpHeight','dpWeight','dpHair','dpEyes','dpSkin','dpAppearance',
-'bgTraits','bgIdeals','bgBonds','bgFlaws','bgAllies','bgEnemies','bgNotes',
-'toolComp','languages','classPriv','racialTraits','talentsText'
-].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=S[id]||''; });
-buildHdGrid();
-buildDeath();
-buildWeapons();
-buildFeats();
-buildVantTags();
-buildSlots();
-buildSpellLvTabs();
-buildSpellContent();
-buildCantrips();
-buildInventory();
-buildComp();
-updateAll();
-if(typeof loadBuilderState!=="undefined") loadBuilderState();
+    try { 
+        const raw=localStorage.getItem('dnd5e_v3'); 
+        if(raw) {
+            const loadedData = JSON.parse(raw);
+            Object.assign(S, loadedData);
+        }
+    } catch(e) { console.warn("Errore caricamento:", e); }
+
+    // Popolamento campi input
+    FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            const val = id.startsWith('coin') ? S.coins[id.replace('coin','')] : S[id];
+            if(el.type === 'checkbox') el.checked = val || false;
+            else el.value = val || (el.type === 'number' ? 0 : '');
+        }
+    });
+
+    // Popolamento statistiche
+    STATS.map(s=>s.id).forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = S[id] || 10;
+    });
+
+    // Aggiornamento UI
+    if(document.getElementById('hpMaxShow')) document.getElementById('hpMaxShow').textContent = S.hpMax || 0;
+    
+    buildHdGrid();
+    buildDeath();
+    buildWeapons();
+    buildFeats();
+    buildVantTags();
+    buildSlots();
+    buildSpellLvTabs();
+    buildSpellContent();
+    buildCantrips();
+    buildInventory();
+    buildComp();
+    updateAll();
 }
+
 // ══════════════════════════════════════════
-// INIT
+// INIT & EVENT LISTENERS
 // ══════════════════════════════════════════
 buildStats();
 loadAll();
-setInterval(()=>{ saveAll(); }, 5000);
+
+// Salva AUTOMATICAMENTE ogni volta che cambi qualcosa
+document.addEventListener('input', () => {
+    saveAll();
+});
+
+// Salva quando chiudi o cambi tab
+window.addEventListener('beforeunload', () => {
+    saveAll();
+});
